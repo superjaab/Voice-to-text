@@ -98,6 +98,9 @@
       margin-top: 15px;
       background: #fafafa;
     }
+    #output {
+      outline: none;
+    }
     #saved {
       background: #fdfdfd;
     }
@@ -142,19 +145,18 @@
   <div class="container">
     <h2>🎤 แปลงเสียงพูดเป็นข้อความ By. Super</h2>
 
-    <!-- ปุ่มด้านบน -->
     <div style="text-align: center;">
       <button id="startBtn" onclick="startListening()">🎙️ เริ่มฟัง</button>
       <button id="stopBtn" onclick="stopListening()">⛔ หยุดฟัง</button>
       <button onclick="saveToPage()">💾 บันทึกข้อความ</button>
       <button onclick="toggleGuide()">📘 คำแนะนำ</button>
+      <button id="toggleSoundBtn" onclick="toggleSound()" style="font-size:14px;">🔈 เปิดเสียง</button>
     </div>
 
     <div id="mic-bar"><div id="mic-level"></div></div>
     <div id="mic-device">กำลังตรวจสอบอุปกรณ์ไมค์...</div>
     <div id="status" class="stopped">[ไมค์ยังไม่เริ่มทำงาน]</div>
 
-    <!-- ข้อความที่พูด -->
     <h3 style="display: flex; align-items: center; justify-content: space-between;">
       <span>📝 ข้อความที่พูด:</span>
       <span>
@@ -162,9 +164,8 @@
         <button onclick="clearCurrentText()">🧹 ล้างข้อความ</button>
       </span>
     </h3>
-    <div id="output">[ข้อความจะปรากฏที่นี่]</div>
+    <div id="output" contenteditable="true">[ข้อความจะปรากฏที่นี่]</div>
 
-    <!-- กล่องคำแนะนำ -->
     <div id="guide">
       <h4>📘 วิธีใช้งานเบื้องต้น</h4>
       <ul style="line-height: 1.8;">
@@ -174,15 +175,13 @@
         <li>📋 คลิก <b>คัดลอกข้อความ</b> เพื่อคัดลอกข้อความล่าสุด</li>
         <li>🧹 คลิก <b>ล้างข้อความ</b> เพื่อเคลียร์ข้อความ</li>
         <li>🧠 กด <b>Spacebar</b> เพื่อเริ่ม/หยุดฟังเสียงได้ทันที</li>
-        <li>⌨️ กด <b>Ctrl</b> ที่แป้นพิมพ์เพื่อคัดลอกข้อความทันที</li>
-        <li>📌 ข้อความที่บันทึกจะไม่หายแม้ปิดเว็บ</li>
+        <li>⌨️ กด <b>Ctrl</b> เพื่อคัดลอกข้อความ</li>
+        <li>⌫ กด <b>Backspace</b> เพื่อลบคำล่าสุดขณะฟัง</li>
       </ul>
     </div>
 
-    <!-- บันทึก -->
     <h3>📚 บันทึกที่เก็บไว้:</h3>
     <div id="saved">[ยังไม่มีบันทึก]</div>
-  </div>
 
   <script>
     const output = document.getElementById("output");
@@ -192,10 +191,22 @@
     const micDevice = document.getElementById("mic-device");
     const startBtn = document.getElementById("startBtn");
     const stopBtn = document.getElementById("stopBtn");
+    const toggleSoundBtn = document.getElementById("toggleSoundBtn");
 
     let allText = "";
     let isListening = false;
     let userWantsToListen = false;
+    let soundOn = localStorage.getItem("voiceSoundOn") !== "false";
+
+    const startSound = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+    const stopSound = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      localStorage.setItem("voiceSoundOn", soundOn);
+      toggleSoundBtn.textContent = soundOn ? "🔈 เปิดเสียง" : "🔇 ปิดเสียง";
+    }
+    toggleSoundBtn.textContent = soundOn ? "🔈 เปิดเสียง" : "🔇 ปิดเสียง";
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -213,6 +224,7 @@
       recognition.interimResults = true;
 
       recognition.onstart = () => {
+        if (soundOn) startSound.play();
         isListening = true;
         status.textContent = "🎤 กำลังฟัง... (กด Spacebar เพื่อหยุด)";
         status.classList.remove("stopped");
@@ -235,6 +247,7 @@
       };
 
       recognition.onend = () => {
+        if (soundOn) stopSound.play();
         isListening = false;
         status.textContent = "[หยุดฟังแล้ว] (กด Spacebar เพื่อเริ่ม)";
         status.classList.remove("listening");
@@ -257,6 +270,7 @@
         userWantsToListen = false;
         recognition.stop();
         stopMicMonitor();
+        copyText(); // คัดลอกข้อความทันที
       };
 
       window.copyText = function () {
@@ -383,22 +397,21 @@
           isListening ? stopListening() : startListening();
         }
         if (event.key === "Control" && !event.repeat) {
-          const text = allText.trim();
-          if (!text) return;
-          navigator.clipboard.writeText(text).then(() => {
-            const btn = document.querySelector('button[onclick="copyText()"]');
-            const original = btn.innerHTML;
-            btn.innerHTML = "✅ คัดลอกแล้ว!!!";
-            btn.style.background = "#4caf50";
-            setTimeout(() => {
-              btn.innerHTML = original;
-              btn.style.background = "#2b6777";
-            }, 1500);
-          });
+          copyText();
+        }
+        if (event.key === "Backspace" && isListening) {
+          event.preventDefault();
+          const words = allText.trim().split(" ");
+          words.pop();
+          allText = words.join(" ") + " ";
+          output.textContent = allText;
         }
       });
 
-      window.addEventListener("DOMContentLoaded", loadSavedEntries);
+      window.addEventListener("DOMContentLoaded", () => {
+        loadSavedEntries();
+        toggleSoundBtn.textContent = soundOn ? "🔈 เปิดเสียง" : "🔇 ปิดเสียง";
+      });
     }
   </script>
 </body>
