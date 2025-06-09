@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Voice to Text</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: #f0f2f5;
+      padding: 30px;
+      color: #333;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2b6777;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    button {
+      background: #2b6777;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin: 5px 3px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #3f8a99;
+    }
+
+    .entry {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      line-height: 1.5;
+    }
+
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .entry-header strong {
+      color: #2b6777;
+      font-size: 15px;
+    }
+
+    .entry-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .entry-buttons button {
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .entry-buttons button:hover {
+      background: #ccc;
+    }
+
+    .saved-text {
+      font-size: 15px;
+      color: #333;
+    }
+
+    #output, #saved {
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      background: #fafafa;
+    }
+
+    #saved {
+      background: #fdfdfd;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-style: italic;
+      color: #666;
+    }
+
+    #mic-bar {
+      width: 100%;
+      height: 12px;
+      background: #eee;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    #mic-level {
+      height: 100%;
+      width: 0%;
+      background: #4caf50;
+      transition: width 0.1s ease;
+    }
+
+    #mic-device {
+      margin-top: 8px;
+      color: #555;
+      font-size: 14px;
+    }
+
+    h3 span button {
+      margin-left: 5px;
+      padding: 5px 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🎤 แปลงเสียงพูดเป็นข้อความ By. Super</h2>
+    <div style="text-align: center;">
+      <button onclick="startListening()">🎙️ เริ่มฟัง</button>
+      <button onclick="stopListening()">⛔ หยุดฟัง</button>
+      <button onclick="saveToPage()">💾 บันทึกข้อความ</button>
+    </div>
+
+    <div id="mic-bar"><div id="mic-level"></div></div>
+    <div id="mic-device">กำลังตรวจสอบอุปกรณ์ไมค์...</div>
+    <div id="status">[ไมค์ยังไม่เริ่มทำงาน]</div>
+
+    <h3 style="display: flex; align-items: center; justify-content: space-between;">
+      <span>📝 ข้อความที่พูด:</span>
+      <span>
+        <button onclick="copyText()">📋 คัดลอกข้อความ</button>
+        <button onclick="clearCurrentText()">🧹 ล้างข้อความ</button>
+      </span>
+    </h3>
+    <div id="output">[ข้อความจะปรากฏที่นี่]</div>
+
+    <h3>📚 บันทึกที่เก็บไว้:</h3>
+    <div id="saved">[ยังไม่มีบันทึก]</div>
+  </div>
+
+  <script>
+    const output = document.getElementById("output");
+    const saved = document.getElementById("saved");
+    const status = document.getElementById("status");
+    const micLevel = document.getElementById("mic-level");
+    const micDevice = document.getElementById("mic-device");
+
+    let allText = "";
+    let isListening = false;
+    let userWantsToListen = false;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      output.textContent = "เบราว์เซอร์นี้ไม่รองรับ Speech Recognition";
+    } else {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'th-TH';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        isListening = true;
+        status.textContent = "🎤 กำลังฟัง... (กด Spacebar เพื่อหยุด)";
+      };
+
+      recognition.onresult = (event) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript.trim();
+          if (event.results[i].isFinal) {
+            allText += transcript + " ";
+          } else {
+            interim = transcript;
+          }
+        }
+        output.textContent = allText + (interim ? "... " + interim + " ..." : "");
+      };
+
+      recognition.onerror = (event) => {
+        output.textContent += "\n[เกิดข้อผิดพลาด: " + event.error + "]";
+        status.textContent = "[ไมค์หยุดทำงาน]";
+      };
+
+      recognition.onend = () => {
+        isListening = false;
+        status.textContent = "[หยุดฟังแล้ว] (กด Spacebar เพื่อเริ่ม)";
+        if (userWantsToListen) recognition.start();
+      };
+
+      window.startListening = function () {
+        if (!isListening) {
+          userWantsToListen = true;
+          recognition.start();
+          output.textContent = allText || "[กำลังฟัง...]";
+          initMicMonitor();
+        }
+      };
+
+      window.stopListening = function () {
+        userWantsToListen = false;
+        recognition.stop();
+        stopMicMonitor();
+      };
+
+      window.copyText = function () {
+        navigator.clipboard.writeText(allText).then(() => {
+          alert("คัดลอกข้อความเรียบร้อยแล้ว!");
+        });
+      };
+
+      window.clearCurrentText = function () {
+        allText = "";
+        output.textContent = "[ข้อความจะปรากฏที่นี่]";
+      };
+
+      window.saveToPage = function () {
+        if (allText.trim() === "") {
+          alert("ยังไม่มีข้อความให้บันทึก");
+          return;
+        }
+
+        const time = new Date().toLocaleTimeString();
+        const content = allText.trim();
+
+        const newEntry = { time, text: content };
+
+        const savedData = JSON.parse(localStorage.getItem("savedEntries") || "[]");
+        savedData.push(newEntry);
+        localStorage.setItem("savedEntries", JSON.stringify(savedData));
+
+        renderEntry(newEntry);
+        allText = "";
+        output.textContent = "[ข้อความจะปรากฏที่นี่]";
+      };
+
+      function renderEntry(entry) {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.innerHTML = `
+          <div class="entry-header">
+            <strong>[${entry.time}]</strong>
+            <div class="entry-buttons">
+              <button onclick="copyEntry(this)">📋 คัดลอก</button>
+              <button onclick="deleteEntry(this)">🗑 ลบ</button>
+            </div>
+          </div>
+          <span class="saved-text">${entry.text}</span>
+        `;
+        if (saved.textContent === "[ยังไม่มีบันทึก]") saved.textContent = "";
+        saved.appendChild(div);
+      }
+
+      window.copyEntry = function (btn) {
+        const text = btn.closest(".entry").querySelector(".saved-text").innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          alert("คัดลอกข้อความบันทึกแล้ว!");
+        });
+      };
+
+      window.deleteEntry = function (btn) {
+        const entry = btn.closest(".entry");
+        const text = entry.querySelector(".saved-text").innerText;
+        const time = entry.querySelector("strong").innerText.replace(/\[|\]/g, "");
+
+        let savedData = JSON.parse(localStorage.getItem("savedEntries") || "[]");
+        savedData = savedData.filter(e => !(e.text === text && e.time === time));
+        localStorage.setItem("savedEntries", JSON.stringify(savedData));
+
+        entry.remove();
+        if (saved.children.length === 0) {
+          saved.textContent = "[ยังไม่มีบันทึก]";
+        }
+      };
+
+      function loadSavedEntries() {
+        const savedData = localStorage.getItem("savedEntries");
+        if (!savedData) return;
+
+        const entries = JSON.parse(savedData);
+        if (entries.length > 0) saved.textContent = "";
+
+        entries.forEach(renderEntry);
+      }
+
+      let audioContext, analyser, micSource, micInterval;
+
+      function initMicMonitor() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            navigator.mediaDevices.enumerateDevices().then(devices => {
+              const mic = devices.find(d => d.kind === 'audioinput' && d.deviceId !== 'default');
+              micDevice.textContent = mic
+                ? `🎧 อุปกรณ์ไมค์: ${mic.label || 'ไม่ทราบชื่อ'}`
+                : `🎧 ไม่พบอุปกรณ์ไมค์`;
+            });
+
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            micSource = audioContext.createMediaStreamSource(stream);
+            micSource.connect(analyser);
+            const dataArray = new Uint8Array(analyser.fftSize);
+
+            micInterval = setInterval(() => {
+              analyser.getByteTimeDomainData(dataArray);
+              let sum = 0;
+              for (let i = 0; i < dataArray.length; i++) {
+                const val = (dataArray[i] - 128) / 128;
+                sum += val * val;
+              }
+              const volume = Math.min(1, Math.sqrt(sum / dataArray.length) * 3);
+              micLevel.style.width = `${volume * 100}%`;
+            }, 100);
+          })
+          .catch(err => {
+            console.warn("ไม่สามารถเข้าถึงไมค์:", err);
+            micDevice.textContent = "❌ ไม่สามารถเข้าถึงไมค์";
+          });
+      }
+
+      function stopMicMonitor() {
+        if (micInterval) clearInterval(micInterval);
+        micLevel.style.width = "0%";
+        if (audioContext) audioContext.close();
+        status.textContent = "[หยุดฟังแล้ว]";
+      }
+
+      document.addEventListener("keydown", function (event) {
+        if (event.code === "Space") {
+          event.preventDefault();
+          if (isListening) stopListening();
+          else startListening();
+        }
+      });
+
+      window.addEventListener("DOMContentLoaded", loadSavedEntries);
+    }
+  </script>
+</body>
+</html>
