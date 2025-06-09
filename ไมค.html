@@ -1,355 +1,472 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Voice to Text</title>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;500&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>bet Calculator By Super</title>
   <style>
     body {
-      font-family: 'Prompt', sans-serif;
-      background: #f0f2f5;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
       padding: 30px;
       color: #333;
+      transition: background 0.3s, color 0.3s;
     }
-
+    body.dark {
+      background: #1c1c1c;
+      color: #f0f0f0;
+    }
     h2 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #2b6777;
+      color: #00b4d8;
     }
-
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    .button-group {
+      text-align: center;
+      margin: 20px 0;
     }
-
     button {
-      background: #2b6777;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      margin: 5px 3px;
       padding: 10px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #00b4d8;
+      color: white;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #0077b6;
+    }
+    input, select {
+      padding: 6px;
+      width: 90%;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+      background: #fff;
+      color: #000;
+    }
+    body.dark input, body.dark select {
+      background: #333;
+      color: #eee;
+      border-color: #666;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    body.dark table {
+      background: #2b2b2b;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+    }
+    body.dark th, body.dark td {
+      border-color: #444;
+    }
+    thead {
+      background-color: #caf0f8;
+    }
+    body.dark thead {
+      background-color: #0077b6;
+      color: white;
+    }
+    .profile-buttons {
+      text-align: center;
+      margin: 10px 0 20px;
+    }
+    .profile-buttons button {
+      padding: 8px 16px;
+      margin: 0 4px;
+      border: none;
+      border-radius: 50%;
       font-size: 16px;
       cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button:hover {
-      background: #3f8a99;
-    }
-
-    .entry {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 10px 14px;
-      margin-bottom: 10px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-      font-size: 15px;
-    }
-
-    .text-line {
-      flex: 1;
-      color: #333;
-    }
-
-    .entry-buttons {
-      display: flex;
-      gap: 8px;
-      margin-left: 10px;
-    }
-
-    .entry-buttons button {
       background: #e0e0e0;
       color: #333;
+      transition: 0.3s;
+    }
+    body.dark .profile-buttons button {
+      background: #555;
+      color: white;
+    }
+    .profile-buttons button.active {
+      background: #00b4d8;
+      color: white;
+      font-weight: bold;
+    }
+    .bonus-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .bonus-value, .diff-note {
+      font-size: 0.85em;
+      margin-top: 4px;
+      color: #007700;
+    }
+    .diff-note {
+      color: #ff5252;
+    }
+    #totalAllFund, #recommendation {
+      font-weight: bold;
+      text-align: center;
+      margin: 10px 0;
+    }
+    #savedRecords {
+      margin-top: 30px;
+      border-top: 2px solid #90caf9;
+      padding-top: 20px;
+    }
+    .record-card {
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #cce7f6;
+    }
+    body.dark .record-card {
+      background: #2d2d2d;
+      border-color: #444;
+    }
+    .record-card h4 {
+      margin: 0 0 15px;
+      color: #0077b6;
+    }
+    .delete-btn {
+      background: #d32f2f;
+      color: white;
+      padding: 8px 16px;
       border: none;
-      border-radius: 6px;
-      padding: 5px 10px;
-      font-size: 14px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background 0.2s;
     }
-
-    .entry-buttons button:hover {
-      background: #ccc;
+    .delete-btn:hover {
+      background: #b71c1c;
     }
-
-    #output, #saved {
-      white-space: pre-wrap;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      padding: 15px;
-      margin-top: 15px;
-      background: #fafafa;
-    }
-
-    #saved {
-      background: #fdfdfd;
-    }
-
-    #status {
-      margin-top: 15px;
-      font-style: italic;
-      color: #666;
-    }
-
-    #mic-bar {
-      width: 100%;
-      height: 12px;
-      background: #eee;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    #mic-level {
-      height: 100%;
-      width: 0%;
-      background: #4caf50;
-      transition: width 0.1s ease;
-    }
-
-    #mic-device {
-      margin-top: 8px;
-      color: #555;
-      font-size: 14px;
-    }
-
-    h3 span button {
-      margin-left: 5px;
-      padding: 5px 10px;
-      font-size: 14px;
+    body.dark .delete-btn {
+      background: #b71c1c;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🎤 แปลงเสียงพูดเป็นข้อความ By. Super</h2>
-    <div style="text-align: center;">
-      <button onclick="startListening()">🎙️ เริ่มฟัง</button>
-      <button onclick="stopListening()">⛔ หยุดฟัง</button>
-      <button onclick="saveToPage()">💾 บันทึกข้อความ</button>
-    </div>
+  <h2>bet Calculator By Super #22.5.68</h2>
+  <div class="button-group">
+    <button onclick="toggleDarkMode()">🌓 โหมดกลางคืน / สว่าง</button>
+  </div>
+  <div class="profile-buttons">
+    <button onclick="setProfile('1')" id="btnP1">1</button>
+    <button onclick="setProfile('2')" id="btnP2">2</button>
+    <button onclick="setProfile('3')" id="btnP3">3</button>
+    <button onclick="setProfile('4')" id="btnP4">4</button>
+    <button onclick="setProfile('5')" id="btnP5">5</button>
+    <button onclick="setProfile('6')" id="btnP6">6</button>
+  </div>
+  <div id="profileTitle" style="text-align:center; font-weight:bold; font-size:1.1em; margin-bottom:10px;">
+    โปรไฟล์ที่: 1
+  </div>
+  <form>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>ชื่อเว็บ</th>
+          <th>เงินทุน</th>
+          <th>โบนัส</th>
+          <th>ค่าน้ำ</th>
+          <th>หลังแทง</th>
+          <th>ได้+โบนัส(อีกฝั่ง)</th>
+          <th>กำไร</th>
+          <th>เฉลี่ย</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>❶</td>
+          <td><input id="name1" placeholder="เช่น sbobet" oninput="saveForm()" /></td>
+          <td><input type="number" id="fund1" oninput="saveForm()" /></td>
+          <td class="bonus-group">
+            <select id="bonus1" onchange="saveForm()">
+              <option value="0">ไม่มีโบนัส</option>
+              <option value="0.03">3%</option>
+              <option value="0.03inc">3% (รวมแทง)</option>
+              <option value="-0.05">ยอดเสีย 5%</option>
+              <option value="-0.06">ยอดเสีย 6%</option>
+              <option value="-0.5">ยอดเสีย 50%</option>
+            </select>
+            <div class="bonus-value" id="bonus1_value">-</div>
+          </td>
+          <td><input type="number" id="odd1" oninput="saveForm()" />
+            <div class="diff-note" id="diffNote1">-</div></td>
+          <td><span id="result1_afterbet">-</span></td>
+          <td><span id="result1_total">-</span></td>
+          <td><span id="profit1">-</span></td>
+          <td><span id="profit1_balanced">-</span></td>
+        </tr>
+        <tr>
+          <td>❷</td>
+          <td><input id="name2" placeholder="เช่น sanook" oninput="saveForm()" /></td>
+          <td><input type="number" id="fund2" oninput="saveForm()" /></td>
+          <td class="bonus-group">
+            <select id="bonus2" onchange="saveForm()">
+              <option value="0">ไม่มีโบนัส</option>
+              <option value="0.03">3%</option>
+              <option value="0.03inc">3% (รวมแทง)</option>
+              <option value="-0.05">ยอดเสีย 5%</option>
+              <option value="-0.06">ยอดเสีย 6%</option>
+              <option value="-0.5">ยอดเสีย 50%</option>
+            </select>
+            <div class="bonus-value" id="bonus2_value">-</div>
+          </td>
+          <td><input type="number" id="odd2" oninput="saveForm()" />
+            <div class="diff-note" id="diffNote2">-</div></td>
+          <td><span id="result2_afterbet">-</span></td>
+          <td><span id="result2_total">-</span></td>
+          <td><span id="profit2">-</span></td>
+          <td><span id="profit2_balanced">-</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
 
-    <div id="mic-bar"><div id="mic-level"></div></div>
-    <div id="mic-device">กำลังตรวจสอบอุปกรณ์ไมค์...</div>
-    <div id="status">[ไมค์ยังไม่เริ่มทำงาน]</div>
+  <div id="totalAllFund">รวมเงินทุนทั้งหมด: -</div>
 
-    <h3 style="display: flex; align-items: center; justify-content: space-between;">
-      <span>📝 ข้อความที่พูด:</span>
-      <span>
-        <button onclick="copyText()">📋 คัดลอกข้อความ</button>
-        <button onclick="clearCurrentText()">🧹 ล้างข้อความ</button>
-      </span>
-    </h3>
-    <div id="output">[ข้อความจะปรากฏที่นี่]</div>
-
-    <h3>📚 บันทึกที่เก็บไว้:</h3>
-    <div id="saved">[ยังไม่มีบันทึก]</div>
+  <div class="button-group">
+    <button onclick="calculate()">คำนวณ</button>
+    <button onclick="suggestBalance()">เฉลี่ยกำไร</button>
+    <button onclick="saveRecord()">บันทึกข้อมูล</button>
+    <button onclick="clearForm()">Clear</button>
+    <button onclick="clearSavedRecords()">ล้างข้อมูลที่บันทึกทั้งหมด</button>
   </div>
 
+  <div id="recommendation">-</div>
+
+  <div id="savedRecords">
+    <h3>📂 ข้อมูลที่บันทึกไว้</h3>
+    <div id="recordsList"></div>
+  </div>
+
+  <!-- 🔽 JavaScript ครบทั้งหมด -->
   <script>
-    const output = document.getElementById("output");
-    const saved = document.getElementById("saved");
-    const status = document.getElementById("status");
-    const micLevel = document.getElementById("mic-level");
-    const micDevice = document.getElementById("mic-device");
+    let currentProfile = "1";
+    let calcTimer;
 
-    let allText = "";
-    let isListening = false;
-    let userWantsToListen = false;
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+    }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    function setProfile(id) {
+      currentProfile = id;
+      document.getElementById("profileTitle").textContent = "โปรไฟล์ที่: " + id;
+      for (let i = 1; i <= 6; i++) {
+        document.getElementById("btnP" + i).classList.remove("active");
+      }
+      document.getElementById("btnP" + id).classList.add("active");
+      loadForm();
+      renderRecords();
+    }
 
-    if (!SpeechRecognition) {
-      output.textContent = "เบราว์เซอร์นี้ไม่รองรับ Speech Recognition";
-    } else {
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'th-TH';
-      recognition.continuous = true;
-      recognition.interimResults = true;
+    function parseBonusRate(val) {
+      return val === "0.03inc" ? 0.03 : parseFloat(val);
+    }
+    function isBonusIncluded(val) {
+      return val === "0.03inc";
+    }
 
-      recognition.onstart = () => {
-        isListening = true;
-        status.textContent = "🎤 กำลังฟัง... (กด Spacebar เพื่อหยุด)";
+    function saveForm() {
+      const form = {
+        name1: name1.value, name2: name2.value,
+        fund1: fund1.value, fund2: fund2.value,
+        odd1: odd1.value, odd2: odd2.value,
+        bonus1: bonus1.value, bonus2: bonus2.value
       };
+      localStorage.setItem("form_profile_" + currentProfile, JSON.stringify(form));
+      clearTimeout(calcTimer);
+      calcTimer = setTimeout(() => calculate(), 100);
+    }
 
-      recognition.onresult = (event) => {
-        let interim = "";
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const transcript = event.results[i][0].transcript.trim();
-          if (event.results[i].isFinal) {
-            allText += transcript + " ";
-          } else {
-            interim = transcript;
-          }
-        }
-        output.textContent = allText + (interim ? "... " + interim + " ..." : "");
+    function loadForm() {
+      const saved = JSON.parse(localStorage.getItem("form_profile_" + currentProfile));
+      if (!saved) return;
+      for (let key in saved) {
+        const el = document.getElementById(key);
+        if (el) el.value = saved[key];
+      }
+      updateBonusDisplay();
+      calculate();
+    }
+
+    function updateBonusDisplay() {
+      const f1 = parseFloat(fund1.value) || 0;
+      const f2 = parseFloat(fund2.value) || 0;
+      const r1 = parseBonusRate(bonus1.value);
+      const r2 = parseBonusRate(bonus2.value);
+      const cap1 = bonus1.value === "-0.5" ? 2888 : Infinity;
+      const cap2 = bonus2.value === "-0.5" ? 2888 : Infinity;
+      const b1 = isBonusIncluded(bonus1.value) ? f1 * r1 : Math.min(f1 * Math.abs(r1), cap1);
+      const b2 = isBonusIncluded(bonus2.value) ? f2 * r2 : Math.min(f2 * Math.abs(r2), cap2);
+      bonus1_value.textContent = Math.floor(b1);
+      bonus2_value.textContent = Math.floor(b2);
+      totalAllFund.textContent = "รวมเงินทุนทั้งหมด: " + Math.floor(f1 + f2) + " บาท";
+    }
+
+    function calculate(f1adj = 0, f2adj = 0, balanced = false) {
+      const f1 = (parseFloat(fund1.value) || 0) + f1adj;
+      const f2 = (parseFloat(fund2.value) || 0) + f2adj;
+      const o1 = parseFloat(odd1.value) || 0;
+      const o2 = parseFloat(odd2.value) || 0;
+      const r1 = parseBonusRate(bonus1.value);
+      const r2 = parseBonusRate(bonus2.value);
+      const isL1 = bonus1.value.startsWith("-");
+      const isL2 = bonus2.value.startsWith("-");
+      const isI1 = isBonusIncluded(bonus1.value);
+      const isI2 = isBonusIncluded(bonus2.value);
+      const b1 = isI1 ? f1 * r1 : Math.min(f1 * Math.abs(r1), bonus1.value === "-0.5" ? 2888 : Infinity);
+      const b2 = isI2 ? f2 * r2 : Math.min(f2 * Math.abs(r2), bonus2.value === "-0.5" ? 2888 : Infinity);
+      const d1 = o1 < 1 ? Math.abs(Math.floor(f1 * o1 - f1)) : 0;
+      const d2 = o2 < 1 ? Math.abs(Math.floor(f2 * o2 - f2)) : 0;
+      const a1 = o1 < 1 ? f1 * 2 : isI1 ? (f1 + b1) * o1 : f1 * o1;
+      const a2 = o2 < 1 ? f2 * 2 : isI2 ? (f2 + b2) * o2 : f2 * o2;
+      const bw1 = (isL1 || isI1 ? Math.min(f2 * Math.abs(r2), bonus2.value === "-0.5" ? 2888 : Infinity) : b1 + Math.min(f2 * Math.abs(r2), bonus2.value === "-0.5" ? 2888 : Infinity)) + d2;
+      const bw2 = (isL2 || isI2 ? Math.min(f1 * Math.abs(r1), bonus1.value === "-0.5" ? 2888 : Infinity) : b2 + Math.min(f1 * Math.abs(r1), bonus1.value === "-0.5" ? 2888 : Infinity)) + d1;
+      const t1 = a1 + bw1;
+      const t2 = a2 + bw2;
+      const tf = f1 + f2;
+      const p1 = t1 - tf;
+      const p2 = t2 - tf;
+      result1_afterbet.textContent = Math.floor(a1);
+      result2_afterbet.textContent = Math.floor(a2);
+      result1_total.textContent = Math.floor(t1);
+      result2_total.textContent = Math.floor(t2);
+      profit1.textContent = Math.floor(p1);
+      profit2.textContent = Math.floor(p2);
+      profit1_balanced.textContent = balanced ? Math.floor(p1) : "-";
+      profit2_balanced.textContent = balanced ? Math.floor(p2) : "-";
+      diffNote1.textContent = o1 < 1 ? `ส่วนต่างน้ำติดลบ ${d1} บาท` : "";
+      diffNote2.textContent = o2 < 1 ? `ส่วนต่างน้ำติดลบ ${d2} บาท` : "";
+      updateBonusDisplay();
+    }
+
+    function suggestBalance() {
+      const p1 = parseFloat(profit1.textContent) || 0;
+      const p2 = parseFloat(profit2.textContent) || 0;
+      const move = Math.abs(p1 - p2) / 2;
+      calculate(p1 < p2 ? move : 0, p2 < p1 ? move : 0, true);
+      recommendation.textContent = `ควรเพิ่มเงินแทงที่ "${p1 > p2 ? name2.value || "ฝั่ง 2" : name1.value || "ฝั่ง 1"}" อีกประมาณ ${Math.floor(move)} บาท เพื่อให้กำไรใกล้เคียงกัน`;
+    }
+
+    function clearForm() {
+      fund1.value = "";
+      fund2.value = "";
+      odd1.value = "";
+      odd2.value = "";
+      bonus1.value = "0";
+      bonus2.value = "0";
+      [
+        "result1_afterbet", "result2_afterbet",
+        "result1_total", "result2_total",
+        "profit1", "profit2",
+        "profit1_balanced", "profit2_balanced",
+        "bonus1_value", "bonus2_value",
+        "totalAllFund", "recommendation",
+        "diffNote1", "diffNote2"
+      ].forEach(id => document.getElementById(id).textContent = "-");
+      saveForm();
+    }
+
+    function saveRecord() {
+      const record = {
+        timestamp: new Date().toLocaleString("th-TH"),
+        name1: name1.value || "ฝั่ง 1",
+        fund1: fund1.value || "0",
+        bonus1: bonus1_value.textContent || "0",
+        odd1: odd1.value || "0",
+        afterbet1: result1_afterbet.textContent || "0",
+        total1: result1_total.textContent || "0",
+        profit1: profit1.textContent || "0",
+        balanced1: profit1_balanced.textContent || "0",
+        name2: name2.value || "ฝั่ง 2",
+        fund2: fund2.value || "0",
+        bonus2: bonus2_value.textContent || "0",
+        odd2: odd2.value || "0",
+        afterbet2: result2_afterbet.textContent || "0",
+        total2: result2_total.textContent || "0",
+        profit2: profit2.textContent || "0",
+        balanced2: profit2_balanced.textContent || "0"
       };
+      const key = "savedRecords_" + currentProfile;
+      const records = JSON.parse(localStorage.getItem(key) || "[]");
+      records.unshift(record);
+      localStorage.setItem(key, JSON.stringify(records));
+      renderRecords();
+    }
 
-      recognition.onerror = (event) => {
-        output.textContent += "\n[เกิดข้อผิดพลาด: " + event.error + "]";
-        status.textContent = "[ไมค์หยุดทำงาน]";
-      };
-
-      recognition.onend = () => {
-        isListening = false;
-        status.textContent = "[หยุดฟังแล้ว] (กด Spacebar เพื่อเริ่ม)";
-        if (userWantsToListen) recognition.start();
-      };
-
-      window.startListening = function () {
-        if (!isListening) {
-          userWantsToListen = true;
-          recognition.start();
-          output.textContent = allText || "[กำลังฟัง...]";
-          initMicMonitor();
-        }
-      };
-
-      window.stopListening = function () {
-        userWantsToListen = false;
-        recognition.stop();
-        stopMicMonitor();
-      };
-
-      window.copyText = function () {
-        navigator.clipboard.writeText(allText).then(() => {
-          alert("คัดลอกข้อความเรียบร้อยแล้ว!");
-        });
-      };
-
-      window.clearCurrentText = function () {
-        allText = "";
-        output.textContent = "[ข้อความจะปรากฏที่นี่]";
-      };
-
-      window.saveToPage = function () {
-        if (allText.trim() === "") {
-          alert("ยังไม่มีข้อความให้บันทึก");
-          return;
-        }
-
-        const time = new Date().toLocaleTimeString("th-TH", { hour12: false });
-        const date = new Date().toLocaleDateString("th-TH");
-        const content = allText.trim();
-
-        const newEntry = { date, time, text: content };
-
-        const savedData = JSON.parse(localStorage.getItem("savedEntries") || "[]");
-        savedData.push(newEntry);
-        localStorage.setItem("savedEntries", JSON.stringify(savedData));
-
-        renderEntry(newEntry);
-        allText = "";
-        output.textContent = "[ข้อความจะปรากฏที่นี่]";
-      };
-
-      function renderEntry(entry) {
-        const div = document.createElement("div");
-        div.className = "entry";
-        div.innerHTML = `
-          <div class="text-line">📅 [${entry.date} ${entry.time}] ${entry.text}</div>
-          <div class="entry-buttons">
-            <button onclick="copyEntry(this)">📋 คัดลอก</button>
-            <button onclick="deleteEntry(this)">🗑 ลบ</button>
+    function renderRecords() {
+      const key = "savedRecords_" + currentProfile;
+      const records = JSON.parse(localStorage.getItem(key) || "[]");
+      recordsList.innerHTML = "";
+      if (records.length === 0) {
+        recordsList.innerHTML = "<p style='text-align:center'>ไม่มีข้อมูล</p>";
+        return;
+      }
+      records.forEach((r, i) => {
+        const html = `
+          <div class="record-card">
+            <h4>📌 บันทึก: ${r.timestamp}</h4>
+            <table style="width:100%; border-collapse:collapse;">
+              <thead style="background:#caf0f8;">
+                <tr>
+                  <th>ฝั่ง</th><th>ทุน</th><th>โบนัส</th><th>ค่าน้ำ</th>
+                  <th>หลังแทง</th><th>ได้+โบนัส</th><th>กำไร</th><th>เฉลี่ย</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>${r.name1}</td><td>${r.fund1}</td><td>${r.bonus1}</td><td>${r.odd1}</td>
+                  <td>${r.afterbet1}</td><td>${r.total1}</td><td>${r.profit1}</td><td>${r.balanced1}</td>
+                </tr>
+                <tr>
+                  <td>${r.name2}</td><td>${r.fund2}</td><td>${r.bonus2}</td><td>${r.odd2}</td>
+                  <td>${r.afterbet2}</td><td>${r.total2}</td><td>${r.profit2}</td><td>${r.balanced2}</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="text-align:right; margin-top:10px;">
+              <button class="delete-btn" onclick="deleteRecord(${i})">🗑️ ลบข้อมูลนี้</button>
+            </div>
           </div>
         `;
-        if (saved.textContent === "[ยังไม่มีบันทึก]") saved.textContent = "";
-        saved.appendChild(div);
-      }
-
-      window.copyEntry = function (btn) {
-        const text = btn.closest(".entry").querySelector(".text-line").innerText;
-        navigator.clipboard.writeText(text).then(() => {
-          alert("คัดลอกข้อความบันทึกแล้ว!");
-        });
-      };
-
-      window.deleteEntry = function (btn) {
-        const entry = btn.closest(".entry");
-        const text = entry.querySelector(".text-line").innerText;
-
-        let savedData = JSON.parse(localStorage.getItem("savedEntries") || "[]");
-        savedData = savedData.filter(e =>
-          !text.includes(e.text) || !text.includes(e.time)
-        );
-        localStorage.setItem("savedEntries", JSON.stringify(savedData));
-
-        entry.remove();
-        if (saved.children.length === 0) {
-          saved.textContent = "[ยังไม่มีบันทึก]";
-        }
-      };
-
-      function loadSavedEntries() {
-        const savedData = localStorage.getItem("savedEntries");
-        if (!savedData) return;
-        const entries = JSON.parse(savedData);
-        if (entries.length > 0) saved.textContent = "";
-        entries.forEach(renderEntry);
-      }
-
-      let audioContext, analyser, micSource, micInterval;
-
-      function initMicMonitor() {
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(stream => {
-            navigator.mediaDevices.enumerateDevices().then(devices => {
-              const mic = devices.find(d => d.kind === 'audioinput' && d.deviceId !== 'default');
-              micDevice.textContent = mic
-                ? `🎧 อุปกรณ์ไมค์: ${mic.label || 'ไม่ทราบชื่อ'}`
-                : `🎧 ไม่พบอุปกรณ์ไมค์`;
-            });
-
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            micSource = audioContext.createMediaStreamSource(stream);
-            micSource.connect(analyser);
-            const dataArray = new Uint8Array(analyser.fftSize);
-
-            micInterval = setInterval(() => {
-              analyser.getByteTimeDomainData(dataArray);
-              let sum = 0;
-              for (let i = 0; i < dataArray.length; i++) {
-                const val = (dataArray[i] - 128) / 128;
-                sum += val * val;
-              }
-              const volume = Math.min(1, Math.sqrt(sum / dataArray.length) * 3);
-              micLevel.style.width = `${volume * 100}%`;
-            }, 100);
-          })
-          .catch(err => {
-            console.warn("ไม่สามารถเข้าถึงไมค์:", err);
-            micDevice.textContent = "❌ ไม่สามารถเข้าถึงไมค์";
-          });
-      }
-
-      function stopMicMonitor() {
-        if (micInterval) clearInterval(micInterval);
-        micLevel.style.width = "0%";
-        if (audioContext) audioContext.close();
-        status.textContent = "[หยุดฟังแล้ว]";
-      }
-
-      document.addEventListener("keydown", function (event) {
-        if (event.code === "Space") {
-          event.preventDefault();
-          if (isListening) stopListening();
-          else startListening();
-        }
+        recordsList.insertAdjacentHTML('beforeend', html);
       });
-
-      window.addEventListener("DOMContentLoaded", loadSavedEntries);
     }
+
+    function deleteRecord(index) {
+      const key = "savedRecords_" + currentProfile;
+      let records = JSON.parse(localStorage.getItem(key) || "[]");
+      records.splice(index, 1);
+      localStorage.setItem(key, JSON.stringify(records));
+      renderRecords();
+    }
+
+    function clearSavedRecords() {
+      if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลที่บันทึกทั้งหมดของโปรไฟล์นี้?")) return;
+      localStorage.removeItem("savedRecords_" + currentProfile);
+      renderRecords();
+    }
+
+    window.onload = () => {
+      if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
+      setProfile("1");
+    };
   </script>
 </body>
 </html>
+
