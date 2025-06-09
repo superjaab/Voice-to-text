@@ -222,8 +222,18 @@
       };
 
       window.copyText = function () {
-        navigator.clipboard.writeText(allText).then(() => {
-          alert("คัดลอกข้อความเรียบร้อยแล้ว!");
+        const text = allText.trim();
+        if (!text) return;
+
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector('button[onclick="copyText()"]');
+          const original = btn.innerHTML;
+          btn.innerHTML = "✅ คัดลอกแล้ว!!!";
+          btn.style.background = "#4caf50";
+          setTimeout(() => {
+            btn.innerHTML = original;
+            btn.style.background = "#2b6777";
+          }, 1500);
         });
       };
 
@@ -257,7 +267,7 @@
         const div = document.createElement("div");
         div.className = "entry";
         div.innerHTML = `
-          <div class="text-line">📅 [${entry.date} ${entry.time}] ${entry.text}</div>
+          <div class="text-line">📅 [${entry.date} ${entry.time}] <span class="saved-text">${entry.text}</span></div>
           <div class="entry-buttons">
             <button onclick="copyEntry(this)">📋 คัดลอก</button>
             <button onclick="deleteEntry(this)">🗑 ลบ</button>
@@ -268,20 +278,25 @@
       }
 
       window.copyEntry = function (btn) {
-        const text = btn.closest(".entry").querySelector(".text-line").innerText;
+        const text = btn.closest(".entry").querySelector(".saved-text").innerText;
         navigator.clipboard.writeText(text).then(() => {
-          alert("คัดลอกข้อความบันทึกแล้ว!");
+          const original = btn.innerHTML;
+          btn.innerHTML = "✅ คัดลอกแล้ว!!!";
+          btn.style.background = "#4caf50";
+          setTimeout(() => {
+            btn.innerHTML = original;
+            btn.style.background = "#e0e0e0";
+          }, 1500);
         });
       };
 
       window.deleteEntry = function (btn) {
         const entry = btn.closest(".entry");
-        const text = entry.querySelector(".text-line").innerText;
+        const text = entry.querySelector(".saved-text").innerText;
+        const time = entry.querySelector(".text-line").innerText.match(/\[(.*?)\]/)?.[1] || "";
 
         let savedData = JSON.parse(localStorage.getItem("savedEntries") || "[]");
-        savedData = savedData.filter(e =>
-          !text.includes(e.text) || !text.includes(e.time)
-        );
+        savedData = savedData.filter(e => !(e.text === text && `${e.date} ${e.time}` === time));
         localStorage.setItem("savedEntries", JSON.stringify(savedData));
 
         entry.remove();
